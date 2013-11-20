@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title> Hava Durumu </title>
+
+    <!-- Meta Information -->
+    <meta charset="UTF-8">
+    <meta name="description" content="Mehmet Tamtürk Bakım Sayfası">
+    <meta name="keywords" content="mehmet,tamtürk, tamturk, bakım, aşama, maintenance, bakım aşaması">
+
+    <script src="jquery-1.7.2.min.js"></script>
+
+    <script src="jquery.simpleWeather-2.3.min.js"></script>
+
+    <link href='http://fonts.googleapis.com/css?family=Quattrocento+Sans:400,700' rel='stylesheet' type='text/css'>
+
+    <script>
+        $(function() {
+            $.simpleWeather({
+                woeid: '2347289', // http://woeid.rosselliot.co.nz/lookup/istanbul
+                unit: 'c',
+                success: function(weather) {
+                    var current = setCurrentWeatherInfo(weather.currently);
+                    var updated = setUpdateInfo(weather.updated);
+                    var direction = setDirection(weather.wind.direction);
+
+                    var markup = '';
+                    markup = '<div class="tab" id="tempDetail">' +
+                                 '<div class="prop high"><div class="header">Yüksek</div> '+ weather.high +'° ' + weather.units.temp +' </div>' +
+                                 '<div class="prop low"><div class="header">Düşük </div> '+ weather.low +'° ' + weather.units.temp +' </div>' +
+                                 '<div class="prop humidty"><div class="header">Nem </div> %'+ weather.humidity +' </div>' +
+                                 '<div class="prop pressure"><div class="header">Basınç </div> '+ weather.pressure + ' ' + weather.units.pressure +' </div>' +
+                                 '<div class="prop visibility"><div class="header">Görüş </div> '+ weather.visibility +' ' + weather.units.distance +' </div>' +
+                             '</div>' +
+                             '<div class="tab" id="tempInfo">' +
+                                 '<div class="cityName"> '+ weather.city +' </div>' +
+                                 '<div class="tempImg">' +
+                                     '<img src="'+ weather.image +'"/>' +
+                                 '</div>' +
+                                 '<div class="temp"> ' + weather.temp + '° ' + weather.units.temp + ' </div>' +
+                                 '<div class="tempType"> '+ current +' </div>' +
+                             '</div>' +
+                             '<div class="tab" id="weatherDetail">' +
+                                 '<div class="prop sunrise"><div class="header">Gün Doğumu </div> '+ weather.sunrise +' </div>' +
+                                 '<div class="prop sunset"><div class="header">Gün Batımı </div> '+ weather.sunset +' </div>' +
+                                 '<div class="prop wind">' +
+                                     '<div class="header"> Rüzgar </div>' +
+                                     '<div class="chill"> <span> Soğukluk : </span> '+ weather.wind.chill +'° ' + weather.units.temp + ' </div>' +
+                                     '<div class="direction"> <span> Yön : </span> '+ direction +' </div>' +
+                                     '<div class="speed"> <span> Hız : </span> '+ weather.wind.speed +' '+ weather.units.speed +' </div>' +
+                                 '</div>' +
+                                 '<div class="update"> Güncellenme <br/> '+ updated +' </div>' +
+                             '</div>';
+
+                    $('#weather').html(markup);
+
+                },
+                error: function(error) {
+                    $("#weather").html('<p>'+error+'</p>');
+                }
+            });
+        });
+
+        var setCurrentWeatherInfo = function(current) {
+            switch (current) {
+                case 'Partly Cloudy' : return 'Parçalı Bulutlu'; break;
+                case 'Fair' : return 'Açık'; break;
+                case 'Cloudy' : return 'Bulutlu'; break;
+                case 'Mostly Cloudy' : return 'Çok Bulutlu'; break;
+                case 'Showers in the Vicinity' : return 'Sağanak Yağışlı'; break;
+                case 'Rain' : return 'Yağmurlu'; break;
+                case 'Light Rain' : return 'Hafif Yağmurlu'; break;
+                case 'Sunny' : return 'Güneşli'; break;
+                default : return current; break;
+            }
+        };
+
+        var setUpdateInfo = function(update) {
+            var updates = update.split(',');
+
+            var dayString = updates[0];
+            var date = updates[1].split(' ');
+            var day = date[1];
+            var month = date[2];
+            var year = date[3];
+            var time = date[4];
+            var exec = date[5];
+
+            dayString = setDay(dayString);
+            month = setMonth(month);
+            time = setTime(time, exec);
+
+            return day + ' ' + month + ' ' + year + ' ' + time + ' ' + dayString;
+        };
+
+        var setDay = function(day) {
+            switch (day) {
+                case 'Sun' : return 'Pazar'; break;
+                case 'Mon' : return 'Pazartesi'; break;
+                case 'Tue' : return 'Salı'; break;
+                case 'Wed' : return 'Çarşamba'; break;
+                case 'Thu' : return 'Perşembe'; break;
+                case 'Fri' : return 'Cuma'; break;
+                case 'Sat' : return 'Cumartesi'; break;
+                default : return day; break;
+            }
+        };
+
+        var setMonth = function(month) {
+            switch (month) {
+                case 'Jan' : return 'Ocak'; break;
+                case 'Feb' : return 'Şubat'; break;
+                case 'Mar' : return 'Mart'; break;
+                case 'Apr' : return 'Nisan'; break;
+                case 'May' : return 'Mayıs'; break;
+                case 'Jun' : return 'Haziran'; break;
+                case 'Jul' : return 'Temmuz'; break;
+                case 'Aug' : return 'Ağustos'; break;
+                case 'Sep' : return 'Eylül'; break;
+                case 'Oct' : return 'Ekim'; break;
+                case 'Nov' : return 'Kasım'; break;
+                case 'Dec' : return 'Aralık'; break;
+                default : return month; break;
+            }
+        };
+
+        var setTime = function(time, exec) {
+            var hour = time.split(':')[0];
+            var minute = time.split(':')[1];
+            if (exec == 'am') {
+                if ( hour < 10)
+                    hour = '0' + hour;
+            } else if (exec == 'pm') {
+                hour = Number(hour) + 12;
+            }
+
+            return hour + ':' + minute;
+        };
+
+        var setDirection = function(direction) {
+
+            switch (direction) {
+                case 'N' : return 'Kuzey'; break;
+                case 'S' : return 'Güney'; break;
+                case 'E' : return 'Doğu'; break;
+                case 'W' : return 'Batı'; break;
+                case 'NE' : return 'Kuzey Doğu'; break;
+                case 'NW' : return 'Kuzey Batı'; break;
+                case 'SE' : return 'Güney Doğu'; break;
+                case 'SW' : return 'Güney Batı'; break;
+                case 'NNE' : return 'Kuzey Doğu'; break;
+                case 'NNW' : return 'Kuzey Batı'; break;
+                case 'SSE' : return 'Güney Doğu'; break;
+                case 'SSW' : return 'Güney Batı'; break;
+                default : return direction; break;
+            }
+        };
+    </script>
+
+    <style>
+        #weather { height: 300px; width: 500px; margin: 0 auto; border: 2px solid black; border-radius: 5px; color:white;
+                   font-family: 'Quattrocento Sans', sans-serif;background: url('background.jpg'); }
+        #weather .tab { height: 100%; width: 155px; float: left; background: none repeat scroll 0 0 rgba(0, 0, 0, 0.4); }
+        #weather .tab .prop { height: 50px; margin-top: 10px; }
+        #weather .tab .prop .header { border-bottom: 1px solid white;font-size: 16px;font-weight: bold;text-align: center; }
+        #weather .tab .prop.wind { height: 100px; text-align: left; }
+        #weather .tab .prop.wind span {line-height: 40px;}
+        #weather .tempImg { height: 150px;margin-top: 25px;padding-left: 15px;width: 170px; }
+        #weather #tempDetail { text-align: center;  }
+        #weather #tempInfo { margin: 0 10px; width: 170px;  }
+        #weather #tempInfo .cityName{ font-size: 25px; line-height: 35px;  margin: 0 auto; text-align: center; width: 150px; }
+        #weather #tempInfo .temp{ font-size: 20px; line-height: 24px;  margin: 0 auto; text-align: center; width: 150px; }
+        #weather #tempInfo .tempType{ font-size: 23px; line-height: 35px;  margin: 0 auto; text-align: center; width: 150px; }
+        #weather #weatherDetail { text-align: center; }
+        #weather .update { bottom: -45px;font-size: 10px;position: relative; }
+
+        .code {
+            border: 1px solid black;
+            width: 1200px;
+            padding: 10px;
+            margin: 0 auto;
+            background: #E5E5E5;
+        }
+
+        em { display: inline-block; width: 30px;}
+        em.a { display: inline-block; width: 60px;}
+        em.b { display: inline-block; width: 90px;}
+        em.c { display: inline-block; width: 120px;}
+
+        h5 { font-size: 20px; margin: 10px 0; }
+
+        .button { position: absolute; top: 100px; padding: 10px;
+            background-image: linear-gradient(bottom, rgb(163,163,163) 48%, rgb(97,97,97) 92%);
+            background-image: -o-linear-gradient(bottom, rgb(163,163,163) 48%, rgb(97,97,97) 92%);
+            background-image: -moz-linear-gradient(bottom, rgb(163,163,163) 48%, rgb(97,97,97) 92%);
+            background-image: -webkit-linear-gradient(bottom, rgb(163,163,163) 48%, rgb(97,97,97) 92%);
+            background-image: -ms-linear-gradient(bottom, rgb(163,163,163) 48%, rgb(97,97,97) 92%);
+
+            background-image: -webkit-gradient(
+                linear,
+                left bottom,
+                left top,
+                color-stop(0.48, rgb(163,163,163)),
+                color-stop(0.92, rgb(97,97,97))
+            );
+          border: 1px solid black; border-radius: 10px; color: white;font-size: 18px;}
+        .button.repo { left: 100px; }
+        .button.download { right: 100px; top: 150px;  }
+        .button.lib { left: 100px; top: 200px; }
+        .button:hover {
+            background-image: linear-gradient(bottom, rgb(122,118,122) 48%, rgb(97,97,97) 8%);
+            background-image: -o-linear-gradient(bottom, rgb(122,118,122) 48%, rgb(97,97,97) 8%);
+            background-image: -moz-linear-gradient(bottom, rgb(122,118,122) 48%, rgb(97,97,97) 8%);
+            background-image: -webkit-linear-gradient(bottom, rgb(122,118,122) 48%, rgb(97,97,97) 8%);
+            background-image: -ms-linear-gradient(bottom, rgb(122,118,122) 48%, rgb(97,97,97) 8%);
+
+            background-image: -webkit-gradient(
+                linear,
+                left bottom,
+                left top,
+                color-stop(0.48, rgb(122,118,122)),
+                color-stop(0.08, rgb(97,97,97))
+            );
+        }
+
+        a { text-decoration:  none; color: white;}
+
+        span.red { color:red; }
+        span.green { color:green; }
+        span.blue { color:blue; }
+        span.orange { color:orange; }
+
+        body {
+            background: #E5FFFF;
+        }
+    </style>
+</head>
+<body>
+
+
+        <a href="https://github.com/monkeecreate/jquery.simpleWeather" target="_blank">
+            <div class="button repo">Kütüphaneyi İndir</div>
+        </a>
+
+        <a href="http://monkeecreate.github.com/jquery.simpleWeather/#source" target="_blank">
+            <div class="button lib">Kütüphane Sayfası</div>
+        </a>
+
+        <a href="http://www.mehmettamturk.com/downloads/weather.zip">
+            <div class="button download"> Örnek Kodu İndir </div>
+        </a>
+
+
+    <div id="weather"></div>
+
+    <h5> Script : </h5>
+    <div class="code">
+        &lt;<span class="red">script</span> <span class="blue"> src=&quot;jquery.simpleWeather.js&quot;</span>&gt;&lt;/<span class="red">script</span>&gt;
+    </div>
+
+    <h5> Code : </h5>
+    <div class="code">
+        <span class="blue">$</span>(<span class="green">function</span>() { <br/>
+        <em></em><span class="blue">$</span>.<span class="red">simpleWeather</span>({<br/>
+        <em class="a"></em><span class="orange">location:</span> &#039;Istanbul&#039;,<br/>
+        <em class="a"></em><span class="orange">unit:</span> &#039;c&#039;,<br/>
+        <em class="a"></em><span class="orange">success:</span> <span class="green">function</span>(weather) {<br/>
+        <em class="b"></em><span class="blue">var</span> current = setCurrentWeatherInfo(weather.currently);<br/>
+        <em class="b"></em><span class="blue">var</span> updated = setUpdateInfo(weather.updated);<br/>
+        <em class="b"></em><span class="blue">var</span> direction = setDirection(weather.wind.direction);<br/><br/>
+
+        <em class="b"></em><span class="blue">var</span>  markup = &#039;&#039;;<br/>
+        <em class="b"></em>markup = &#039;&lt;div class=&quot;tab&quot; id=&quot;tempDetail&quot;&gt;&#039; + <br/>
+        <em class="c"></em><em class="b"></em>&#039;&lt;div class=&quot;prop high&quot;&gt;&lt;div class=&quot;header&quot;&gt;Yüksek&lt;/div&gt; &#039;+ weather.high +&#039;&deg; &#039; + weather.units.temp +&#039; &lt;/div&gt;&#039; + <br/>
+        <em class="c"></em><em class="b"></em>&#039;&lt;div class=&quot;prop low&quot;&gt;&lt;div class=&quot;header&quot;&gt;Düşük &lt;/div&gt; &#039;+ weather.low +&#039;&deg; &#039; + weather.units.temp +&#039; &lt;/div&gt;&#039; + <br/>
+        <em class="c"></em><em class="b"></em>&#039;&lt;div class=&quot;prop humidty&quot;&gt;&lt;div class=&quot;header&quot;&gt;Nem &lt;/div&gt; %&#039;+ weather.humidity +&#039; &lt;/div&gt;&#039; + <br/>
+        <em class="c"></em><em class="b"></em>&#039;&lt;div class=&quot;prop pressure&quot;&gt;&lt;div class=&quot;header&quot;&gt;Basınç &lt;/div&gt; &#039;+ weather.pressure + &#039; &#039; + weather.units.pressure +&#039; &lt;/div&gt;&#039; + <br/>
+        <em class="c"></em><em class="b"></em>&#039;&lt;div class=&quot;prop visibility&quot;&gt;&lt;div class=&quot;header&quot;&gt;Görüş &lt;/div&gt; &#039;+ weather.visibility +&#039; &#039; + weather.units.distance +&#039; &lt;/div&gt;&#039; + <br/>
+        <em class="c"></em><em></em>&#039;&lt;/div&gt;&#039; + <br/>
+        <em class="c"></em><em></em>&#039;&lt;div class=&quot;tab&quot; id=&quot;tempInfo&quot;&gt;&#039; + <br/>
+        <em class="c"></em><em class="b"></em>&#039;&lt;div class=&quot;cityName&quot;&gt; &#039;+ weather.city +&#039; &lt;/div&gt;&#039; + <br/>
+        <em class="c"></em><em class="b"></em>&#039;&lt;div class=&quot;tempImg&quot;&gt;&#039; + <br/>
+        <em class="c"></em><em class="b"></em><em></em>&#039;&lt;img src=&quot;&#039;+ weather.image +&#039;&quot;/&gt;&#039; + <br/>
+        <em class="c"></em><em class="b"></em>&#039;&lt;/div&gt;&#039; + <br/>
+        <em class="c"></em><em class="b"></em>&#039;&lt;div class=&quot;temp&quot;&gt; &#039; + weather.temp + &#039;&deg; &#039; + weather.units.temp + &#039; &lt;/div&gt;&#039; + <br/>
+        <em class="c"></em><em class="b"></em>&#039;&lt;div class=&quot;tempType&quot;&gt; &#039;+ current +&#039; &lt;/div&gt;&#039; + <br/>
+        <em class="c"></em><em></em>&#039;&lt;/div&gt;&#039; + <br/>
+        <em class="c"></em><em></em>&#039;&lt;div class=&quot;tab&quot; id=&quot;weatherDetail&quot;&gt;&#039; + <br/>
+        <em class="c"></em><em class="b"></em>&#039;&lt;div class=&quot;prop sunrise&quot;&gt;&lt;div class=&quot;header&quot;&gt;Gün Doğumu &lt;/div&gt; &#039;+ weather.sunrise +&#039; &lt;/div&gt;&#039; + <br/>
+        <em class="c"></em><em class="b"></em>&#039;&lt;div class=&quot;prop sunset&quot;&gt;&lt;div class=&quot;header&quot;&gt;Gün Batımı &lt;/div&gt; &#039;+ weather.sunset +&#039; &lt;/div&gt;&#039; + <br/>
+        <em class="c"></em><em class="b"></em>&#039;&lt;div class=&quot;prop wind&quot;&gt;&#039; + <br/>
+        <em class="c"></em><em class="b"></em><em></em>&#039;&lt;div class=&quot;header&quot;&gt; R&uuml;zgar &lt;/div&gt;&#039; + <br/>
+        <em class="c"></em><em class="b"></em><em></em>&#039;&lt;div class=&quot;chill&quot;&gt; &lt;span&gt; Soğukluk : &lt;/span&gt; &#039;+ weather.wind.chill +&#039;&deg; &#039; + weather.units.temp + &#039; &lt;/div&gt;&#039; + <br/>
+        <em class="c"></em><em class="b"></em><em></em>&#039;&lt;div class=&quot;direction&quot;&gt; &lt;span&gt; Yön : &lt;/span&gt; &#039;+ direction +&#039; &lt;/div&gt;&#039; + <br/>
+        <em class="c"></em><em class="b"></em><em></em>&#039;&lt;div class=&quot;speed&quot;&gt; &lt;span&gt; Hız : &lt;/span&gt; &#039;+ weather.wind.speed +&#039; &#039;+ weather.units.speed +&#039; &lt;/div&gt;&#039; + <br/>
+        <em class="c"></em><em class="b"></em>&#039;&lt;/div&gt;&#039; + <br/>
+        <em class="c"></em><em class="b"></em>&#039;&lt;div class=&quot;update&quot;&gt; G&uuml;ncellenme &lt;br/&gt; &#039;+ updated +&#039; &lt;/div&gt;&#039; + <br/>
+        <em class="c"></em><em></em>&#039;&lt;/div&gt;&#039;; <br/>
+        <em class="b"></em><br/>
+        <em class="b"></em><span class="blue">$</span>(&#039;#weather&#039;).<span class="orange">html</span>(markup); <br/>
+        <em class="b"></em><br/>
+        <em class="a"></em>}, <br/>
+        <em class="a"></em><span class="orange">error:</span> <span class="green">function</span>(error) { <br/>
+        <em class="b"></em><span class="blue">$</span>(&quot;#weather&quot;).<span class="orange">html</span>(&#039;&lt;p&gt;&#039;+error+&#039;&lt;/p&gt;&#039;); <br/>
+        <em class="a"></em>} <br/>
+        <em></em>}); <br/>
+        }); <br/>
+    </div>
+
+    <h5> Css : </h5>
+    <div class="code">
+        #weather { height: 300px; width: 500px; margin: 0 auto; border: 2px solid black; border-radius: 5px; color:white; }  <br/>
+        #weather .tab { height: 100%; width: 155px; float: left; background: none repeat scroll 0 0 rgba(0, 0, 0, 0.4); }  <br/>
+        #weather .tab .prop { height: 50px; margin-top: 10px; }  <br/>
+        #weather .tab .prop .header { border-bottom: 1px solid white;font-size: 16px;font-weight: bold;text-align: center; }  <br/>
+        #weather .tab .prop.wind { height: 100px; text-align: left; } <br/>
+        #weather .tab .prop.wind span {line-height: 40px;} <br/>
+        #weather .tempImg { height: 150px;margin-top: 25px;padding-left: 15px;width: 170px; } <br/>
+        #weather #tempDetail { text-align: center;  } <br/>
+        #weather #tempInfo { margin: 0 10px; width: 170px;  } <br/>
+        #weather #tempInfo .cityName{ font-size: 25px; line-height: 35px;  margin: 0 auto; text-align: center; width: 150px; } <br/>
+        #weather #tempInfo .temp{ font-size: 20px; line-height: 24px;  margin: 0 auto; text-align: center; width: 150px; } <br/>
+        #weather #tempInfo .tempType{ font-size: 23px; line-height: 35px;  margin: 0 auto; text-align: center; width: 150px; } <br/>
+        #weather #weatherDetail { text-align: center; } <br/>
+        #weather .update { bottom: -45px;font-size: 10px;position: relative; } <br/>
+    </div>
+</body>
+</html>
